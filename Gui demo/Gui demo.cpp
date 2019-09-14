@@ -259,7 +259,7 @@ int main (int argc, char **argv)
    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGBA | GLUT_DEPTH);
    glutInitWindowPosition (5, 5);
    glutInitWindowSize (640, 640);
-   int win = glutCreateWindow ("GUI demo");
+   int win = glutCreateWindow ("Zhiquan Wang");
 
    printGlInfo();
 
