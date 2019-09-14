@@ -31,7 +31,14 @@ MeshData mesh_data;
 
 float angle = 0.0f;
 float scale = 1.0f;
-
+bool enableClearScreen = true;
+bool enableDepthTesting = true;
+float contrast = 1;
+float height = 0.01;
+float speed = 1;
+float texture_speed = 0;
+float float_speed = 0;
+float clearColor[4] = { 0 };
 //Draw the ImGui user interface
 void draw_gui()
 {
@@ -39,10 +46,23 @@ void draw_gui()
 
    ImGui::Begin("Debug menu");
    //uncomment the following line to create a sliders which changes the viewing angle and scale
-   //ImGui::SliderFloat("View angle", &angle, -180.0f, +180.0f);
-   //ImGui::SliderFloat("Scale", &scale, -10.0f, +10.0f);
+   ImGui::SliderFloat("View angle", &angle, -180.0f, +180.0f);
+   ImGui::SliderFloat("Scale", &scale, -10.0f, +10.0f);
+  
    ImGui::End();
-
+   ImGui::Begin("Zhiquan Wang");
+   if (ImGui::Button("Reset Rotation", ImVec2(100, 20))) {
+	   angle = 0.0;
+   }
+   ImGui::Checkbox("Clear Screen", &enableClearScreen);
+   ImGui::Checkbox("Depth Testing", &enableDepthTesting);
+   ImGui::ColorEdit4("Color", clearColor);
+   ImGui::SliderFloat("Contrast", &contrast, 0.0f, 2.0f);
+   ImGui::SliderFloat("Height", &height, 0, 1);
+   ImGui::SliderFloat("speed", &speed, 0, 10);
+   ImGui::SliderFloat("texture_speed", &texture_speed, 0, 5);
+   ImGui::SliderFloat("float_speed", &float_speed, 0, 10);
+   ImGui::End();
    static bool show_test = false;
    ImGui::ShowTestWindow(&show_test);
 
@@ -53,50 +73,81 @@ void draw_gui()
 // This function gets called every time the scene gets redisplayed 
 void display()
 {
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the back buffer
-   
-   glm::mat4 M = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f))*glm::scale(glm::vec3(scale*mesh_data.mScaleFactor));
-   glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-   glm::mat4 P = glm::perspective(40.0f, 1.0f, 0.1f, 100.0f);
-   
+	if (enableClearScreen) {
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the back buffer
 
-   glUseProgram(shader_program);
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, texture_id);
-   int PVM_loc = glGetUniformLocation(shader_program, "PVM");
-   if (PVM_loc != -1)
-   {
-      glm::mat4 PVM = P*V*M;
-      glUniformMatrix4fv(PVM_loc, 1, false, glm::value_ptr(PVM));
+		//Ans:if disable, fish rendered with different rotation because the previous color still stored in the buffer
+	}
+	if (enableDepthTesting) {
+		glEnable(GL_DEPTH_TEST);
+	}
+	else {
+		glDisable(GL_DEPTH_TEST);
+		//Ans, if disable, the inside and the back of the fish can been seen because the pixel is not renderer from back to from
+	}
+
+	glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
+	glm::mat4 M = glm::rotate(angle, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::scale(glm::vec3(scale * mesh_data.mScaleFactor));
+	glm::mat4 V = glm::lookAt(glm::vec3(0.0f, 1.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 P = glm::perspective(40.0f, 1.0f, 0.1f, 100.0f);
+
+
+	glUseProgram(shader_program);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	int PVM_loc = glGetUniformLocation(shader_program, "PVM");
+	if (PVM_loc != -1)
+	{
+		glm::mat4 PVM = P * V * M;
+		glUniformMatrix4fv(PVM_loc, 1, false, glm::value_ptr(PVM));
+	}
+	
+	int P_loc = glGetUniformLocation(shader_program, "P");
+	if (P_loc != -1)
+	{
+		glUniformMatrix4fv(P_loc, 1, false, glm::value_ptr(P));
+	}
+
+	int VM_loc = glGetUniformLocation(shader_program, "VM");
+	if (VM_loc != -1)
+	{
+		glm::mat4 VM = V * M;
+		glUniformMatrix4fv(VM_loc, 1, false, glm::value_ptr(VM));
+	}
+
+	int contrast_fra_loc = glGetUniformLocation(shader_program, "contrast_fra");
+	if (contrast_fra_loc != -1) {
+		glUniform1f(contrast_fra_loc, contrast);
+	}
+	   int height_vs_loc = glGetUniformLocation(shader_program, "height");
+   if (height_vs_loc != -1) {
+	   glUniform1f(height_vs_loc, height);
    }
-
-   int P_loc = glGetUniformLocation(shader_program, "P");
-   if (P_loc != -1)
-   {
-      glUniformMatrix4fv(P_loc, 1, false, glm::value_ptr(P));
+   int speed_vs_loc = glGetUniformLocation(shader_program, "speed");
+   if (speed_vs_loc != -1) {
+	   glUniform1f(speed_vs_loc, speed);
    }
-
-   int VM_loc = glGetUniformLocation(shader_program, "VM");
-   if (VM_loc != -1)
-   {
-      glm::mat4 VM = V*M;
-      glUniformMatrix4fv(VM_loc, 1, false, glm::value_ptr(VM));
+   int ts_vs_loc = glGetUniformLocation(shader_program, "texture_speed");
+   if (ts_vs_loc != -1) {
+	   glUniform1f(ts_vs_loc, texture_speed);
    }
-
-
-   int tex_loc = glGetUniformLocation(shader_program, "diffuse_tex");
-   if (tex_loc != -1)
-   {
-      glUniform1i(tex_loc, 0); // we bound our texture to texture unit 0
+   int fs_vs_loc = glGetUniformLocation(shader_program, "float_speed");
+   if (fs_vs_loc != -1) {
+	   glUniform1f(fs_vs_loc, float_speed);
    }
+	int tex_loc = glGetUniformLocation(shader_program, "diffuse_tex");
+	if (tex_loc != -1)
+	{
+		glUniform1i(tex_loc, 0); // we bound our texture to texture unit 0
+	}
 
-   glBindVertexArray(mesh_data.mVao);
-   glDrawElements(GL_TRIANGLES, mesh_data.mSubmesh[0].mNumIndices, GL_UNSIGNED_INT, 0);
-   //For meshes with multiple submeshes use mesh_data.DrawMesh(); 
+	glBindVertexArray(mesh_data.mVao);
+	glDrawElements(GL_TRIANGLES, mesh_data.mSubmesh[0].mNumIndices, GL_UNSIGNED_INT, 0);
+	//For meshes with multiple submeshes use mesh_data.DrawMesh(); 
 
-   draw_gui();
+	draw_gui();
 
-   glutSwapBuffers();
+	glutSwapBuffers();
 }
 
 void idle()
@@ -112,6 +163,7 @@ void idle()
    {
       glUniform1f(time_loc, time_sec);
    }
+
 }
 
 void reload_shader()
