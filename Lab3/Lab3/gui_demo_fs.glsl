@@ -15,14 +15,15 @@ out vec4 fragcolor;
 in vec2 tex_coord;
 in vec3 nw;
 in vec3 lw;
+in vec3 pw;
 in float dis;
 void main(void)
 {
 	vec3 inKa = Ka;
 	vec3 inKd = Kd;
    vec4 tex_color = texture(diffuse_tex, tex_coord);
-   vec3 rw = reflect(-lw, nw);
-   vec3 vw = normalize(eye_pos - vec3(gl_FragCoord));
+   vec3 rw = normalize(reflect(-lw, nw));
+   vec3 vw = normalize(eye_pos - vec3(pw));
    float attenuation = 1 / pow(dis, 2);
    vec3 ambient_col;
    vec3 diffuse_col;
