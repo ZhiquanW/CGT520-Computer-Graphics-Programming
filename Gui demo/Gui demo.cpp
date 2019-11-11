@@ -29,39 +29,13 @@ static const std::string mesh_name = "Amago0.obj";
 static const std::string texture_name = "AmagoT.bmp";
 MeshData mesh_data;
 
-float angle = 0.0f;
-float scale = 1.0f;
-bool enableClearScreen = true;
-bool enableDepthTesting = true;
-float contrast = 1;
-float height = 0.01;
-float speed = 1;
-float texture_speed = 0;
-float float_speed = 0;
-float clearColor[4] = { 0 };
 //Draw the ImGui user interface
 void draw_gui()
 {
    ImGui_ImplGlut_NewFrame();
 
    ImGui::Begin("Debug menu");
-   //uncomment the following line to create a sliders which changes the viewing angle and scale
-   ImGui::SliderFloat("View angle", &angle, -180.0f, +180.0f);
-   ImGui::SliderFloat("Scale", &scale, -10.0f, +10.0f);
-  
-   ImGui::End();
-   ImGui::Begin("Zhiquan Wang");
-   if (ImGui::Button("Reset Rotation", ImVec2(100, 20))) {
-	   angle = 0.0;
-   }
-   ImGui::Checkbox("Clear Screen", &enableClearScreen);
-   ImGui::Checkbox("Depth Testing", &enableDepthTesting);
-   ImGui::ColorEdit4("Color", clearColor);
-   ImGui::SliderFloat("Contrast", &contrast, 0.0f, 2.0f);
-   ImGui::SliderFloat("Height", &height, 0, 1);
-   ImGui::SliderFloat("speed", &speed, 0, 10);
-   ImGui::SliderFloat("texture_speed", &texture_speed, 0, 5);
-   ImGui::SliderFloat("float_speed", &float_speed, 0, 10);
+   
    ImGui::End();
    static bool show_test = false;
    ImGui::ShowTestWindow(&show_test);
@@ -207,49 +181,7 @@ void initOpenGl()
    texture_id = LoadTexture(texture_name);
 }
 
-// glut callbacks need to send keyboard and mouse events to imgui
-void keyboard(unsigned char key, int x, int y)
-{
-   ImGui_ImplGlut_KeyCallback(key);
 
-   switch(key)
-   {
-      case 'r':
-      case 'R':
-         reload_shader();     
-      break;
-   }
-}
-
-void keyboard_up(unsigned char key, int x, int y)
-{
-   ImGui_ImplGlut_KeyUpCallback(key);
-}
-
-void special_up(int key, int x, int y)
-{
-   ImGui_ImplGlut_SpecialUpCallback(key);
-}
-
-void passive(int x, int y)
-{
-   ImGui_ImplGlut_PassiveMouseMotionCallback(x,y);
-}
-
-void special(int key, int x, int y)
-{
-   ImGui_ImplGlut_SpecialCallback(key);
-}
-
-void motion(int x, int y)
-{
-   ImGui_ImplGlut_MouseMotionCallback(x, y);
-}
-
-void mouse(int button, int state, int x, int y)
-{
-   ImGui_ImplGlut_MouseButtonCallback(button, state);
-}
 
 
 int main (int argc, char **argv)
@@ -265,13 +197,7 @@ int main (int argc, char **argv)
 
    //Register callback functions with glut. 
    glutDisplayFunc(display); 
-   glutKeyboardFunc(keyboard);
-   glutSpecialFunc(special);
-   glutKeyboardUpFunc(keyboard_up);
-   glutSpecialUpFunc(special_up);
-   glutMouseFunc(mouse);
-   glutMotionFunc(motion);
-   glutPassiveMotionFunc(motion);
+
    glutIdleFunc(idle);
 
    initOpenGl();
