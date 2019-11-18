@@ -13,7 +13,22 @@
 #include "InitShader.h"
 #include "imgui_impl_glut.h"
 #include "VAO Surf.h"
+#include "Vector3.h"
+#define vec Vector3
 
+//fluid solver parameters
+vec left_bottom_front = vec();
+vec right_top_back = vec(300, 400, 300);
+int particle_num = 2000;
+float rest_density = -1000;
+float gas_constant = 2000;
+float viscosity = 250;
+float kernel_radius = 16;
+float mass = 65;
+float bound_damping = 0.5;
+float gravity = 12000 * 9.8;
+int frame_num = 400;
+float time_interval = 0.001;
 //camera and viewport
 float camangle = 0.0f;
 glm::vec3 campos(0.0f, 1.0f, 2.0f);
@@ -71,7 +86,7 @@ int main(int argc, char** argv) {
 	glutPassiveMotionFunc(motion);
 	glutIdleFunc(idle);
 	glutReshapeFunc(reshape);
-    // init configuration
+	// init configuration
 	initOpenGl();
 	//Enter the glut event loop.
 	glutMainLoop();
@@ -96,7 +111,7 @@ void initOpenGl() {
 	glEnable(GL_POINT_SPRITE);       // allows textured points
 	glEnable(GL_PROGRAM_POINT_SIZE); //allows us to set point size in vertex shader
 	glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-    // init elementes in the scene
+	// init elementes in the scene
 	particle_shader_program = InitShader(particle_vs.c_str(), particle_fs.c_str());
 	particle_vao = create_particle_vao();
 	ImGui_ImplGlut_Init(); // initialize the imgui system
@@ -106,9 +121,12 @@ void draw_gui() {
 	//glUseProgram(mesh_shader_program);
 	static bool first_frame = true;
 	ImGui_ImplGlut_NewFrame();
-	ImGui::Begin("VAO Surf", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::Begin("Camera Params", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SliderFloat3("Cam Pos", &campos[0], -20.0f, +20.0f);
 	ImGui::SliderFloat("Cam Angle", &camangle, -180.0f, +180.0f);
+	ImGui::End();
+	ImGui::Begin("Fluid Solver Params", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::SliderInt("particle_num", &particle_num, 0, 10000);
 	ImGui::End();
 	ImGui::Render();
 	first_frame = false;
