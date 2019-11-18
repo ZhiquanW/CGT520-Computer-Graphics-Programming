@@ -115,158 +115,144 @@ GLuint InitShader(const char* computeShaderFile)
 
 
 // Create a GLSL program object from vertex and fragment shader files
-GLuint InitShader(const char* vShaderFile, const char* fShaderFile)
-{
+GLuint InitShader(const char* vShaderFile, const char* fShaderFile) {
 
-   bool error = false;
-   struct Shader 
-   {
-      const char*  filename;
-      GLenum       type;
-      GLchar*      source;
-   }  shaders[2] = 
-   {
-      { vShaderFile, GL_VERTEX_SHADER, NULL },
-      { fShaderFile, GL_FRAGMENT_SHADER, NULL }
-   };
+	bool error = false;
+	struct Shader {
+		const char* filename;
+		GLenum       type;
+		GLchar* source;
+	}  shaders[2] =
+	{
+	   { vShaderFile, GL_VERTEX_SHADER, NULL },
+	   { fShaderFile, GL_FRAGMENT_SHADER, NULL }
+	};
 
-   GLuint program = glCreateProgram();
-    
-   for ( int i = 0; i < 2; ++i ) 
-   {
-      Shader& s = shaders[i];
-      s.source = readShaderSource( s.filename );
-      if ( shaders[i].source == NULL ) 
-      {
-         std::cerr << "Failed to read " << s.filename << std::endl;
-         error = true;
-      }
+	GLuint program = glCreateProgram();
 
-      GLuint shader = glCreateShader( s.type );
-      glShaderSource( shader, 1, (const GLchar**) &s.source, NULL );
-      glCompileShader( shader );
+	for (int i = 0; i < 2; ++i) {
+		Shader& s = shaders[i];
+		s.source = readShaderSource(s.filename);
+		if (shaders[i].source == NULL) {
+			std::cerr << "Failed to read " << s.filename << std::endl;
+			error = true;
+		}
 
-      GLint  compiled;
-      glGetShaderiv( shader, GL_COMPILE_STATUS, &compiled );
-      if ( !compiled ) 
-      {
-         std::cerr << s.filename << " failed to compile:" << std::endl;
-         printShaderCompileError(shader);
-         error = true;
-      }
+		GLuint shader = glCreateShader(s.type);
+		glShaderSource(shader, 1, (const GLchar * *)& s.source, NULL);
+		glCompileShader(shader);
 
-      delete [] s.source;
+		GLint  compiled;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		if (!compiled) {
+			std::cerr << s.filename << " failed to compile:" << std::endl;
+			printShaderCompileError(shader);
+			error = true;
+		}
 
-      glAttachShader( program, shader );
-   }
+		delete[] s.source;
 
-   //set shader attrib locations
-   const int pos_loc = 0;
-   const int tex_coord_loc = 1;
-   const int normal_loc = 2;
+		glAttachShader(program, shader);
+	}
 
-   glBindAttribLocation(program, pos_loc, "pos_attrib");
-   glBindAttribLocation(program, tex_coord_loc, "tex_coord_attrib");
-   glBindAttribLocation(program, normal_loc, "normal_attrib");
+	//set shader attrib locations
+	const int pos_loc = 0;
+	const int tex_coord_loc = 1;
+	const int normal_loc = 2;
 
-   /* link  and error check */
-   glLinkProgram(program);
+	glBindAttribLocation(program, pos_loc, "pos_attrib");
+	glBindAttribLocation(program, tex_coord_loc, "tex_coord_attrib");
+	glBindAttribLocation(program, normal_loc, "normal_attrib");
 
-   GLint  linked;
-   glGetProgramiv( program, GL_LINK_STATUS, &linked );
-   if ( !linked ) 
-   {
-      std::cerr << "Shader program failed to link" << std::endl;
-      printProgramLinkError(program);
+	/* link  and error check */
+	glLinkProgram(program);
 
-      error = true;
-   }
+	GLint  linked;
+	glGetProgramiv(program, GL_LINK_STATUS, &linked);
+	if (!linked) {
+		std::cerr << "Shader program failed to link" << std::endl;
+		printProgramLinkError(program);
 
-   if(error == true)
-   {
-      return -1;
-   }
+		error = true;
+	}
 
-   /* use program object */
-   glUseProgram(program);
-   return program;
+	if (error == true) {
+		return -1;
+	}
+
+	/* use program object */
+	glUseProgram(program);
+	return program;
 }
 
 // Create a GLSL program object from vertex and fragment shader files
-GLuint InitShader(const char* vShaderFile, const char* gShaderFile, const char* fShaderFile)
-{
-   bool error = false;
-   struct Shader 
-   {
-      const char*  filename;
-      GLenum       type;
-      GLchar*      source;
-   }  shaders[3] = 
-   {
-      { vShaderFile, GL_VERTEX_SHADER, NULL },
-      { gShaderFile, GL_GEOMETRY_SHADER, NULL },
-      { fShaderFile, GL_FRAGMENT_SHADER, NULL }
-   };
+GLuint InitShader(const char* vShaderFile, const char* gShaderFile, const char* fShaderFile) {
+	bool error = false;
+	struct Shader {
+		const char* filename;
+		GLenum       type;
+		GLchar* source;
+	}  shaders[3] =
+	{
+	   { vShaderFile, GL_VERTEX_SHADER, NULL },
+	   { gShaderFile, GL_GEOMETRY_SHADER, NULL },
+	   { fShaderFile, GL_FRAGMENT_SHADER, NULL }
+	};
 
-   GLuint program = glCreateProgram();
-    
-   for ( int i = 0; i < 3; ++i ) 
-   {
-      Shader& s = shaders[i];
-      s.source = readShaderSource( s.filename );
-      if ( shaders[i].source == NULL ) 
-      {
-         std::cerr << "Failed to read " << s.filename << std::endl;
-         error = true;
-      }
+	GLuint program = glCreateProgram();
 
-      GLuint shader = glCreateShader( s.type );
-      glShaderSource( shader, 1, (const GLchar**) &s.source, NULL );
-      glCompileShader( shader );
+	for (int i = 0; i < 3; ++i) {
+		Shader& s = shaders[i];
+		s.source = readShaderSource(s.filename);
+		if (shaders[i].source == NULL) {
+			std::cerr << "Failed to read " << s.filename << std::endl;
+			error = true;
+		}
 
-      GLint  compiled;
-      glGetShaderiv( shader, GL_COMPILE_STATUS, &compiled );
-      if ( !compiled ) 
-      {
-         std::cerr << s.filename << " failed to compile:" << std::endl;
-         printShaderCompileError(shader);
-         error = true;
-      }
+		GLuint shader = glCreateShader(s.type);
+		glShaderSource(shader, 1, (const GLchar * *)& s.source, NULL);
+		glCompileShader(shader);
 
-      delete [] s.source;
+		GLint  compiled;
+		glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled);
+		if (!compiled) {
+			std::cerr << s.filename << " failed to compile:" << std::endl;
+			printShaderCompileError(shader);
+			error = true;
+		}
 
-      glAttachShader( program, shader );
-   }
+		delete[] s.source;
 
-   //set shader attrib locations
-   const int pos_loc = 0;
-   const int tex_coord_loc = 1;
-   const int normal_loc = 2;
+		glAttachShader(program, shader);
+	}
 
-   glBindAttribLocation(program, pos_loc, "pos_attrib");
-   glBindAttribLocation(program, tex_coord_loc, "tex_coord_attrib");
-   glBindAttribLocation(program, normal_loc, "normal_attrib");
+	//set shader attrib locations
+	const int pos_loc = 0;
+	const int tex_coord_loc = 1;
+	const int normal_loc = 2;
 
-   /* link  and error check */
-   glLinkProgram(program);
+	glBindAttribLocation(program, pos_loc, "pos_attrib");
+	glBindAttribLocation(program, tex_coord_loc, "tex_coord_attrib");
+	glBindAttribLocation(program, normal_loc, "normal_attrib");
 
-   GLint  linked;
-   glGetProgramiv( program, GL_LINK_STATUS, &linked );
-   if ( !linked ) 
-   {
-      std::cerr << "Shader program failed to link" << std::endl;
-      printProgramLinkError(program);
+	/* link  and error check */
+	glLinkProgram(program);
 
-      error = true;
-   }
+	GLint  linked;
+	glGetProgramiv(program, GL_LINK_STATUS, &linked);
+	if (!linked) {
+		std::cerr << "Shader program failed to link" << std::endl;
+		printProgramLinkError(program);
 
-   if(error == true)
-   {
-      return -1;
-   }
+		error = true;
+	}
 
-   /* use program object */
-   glUseProgram(program);
+	if (error == true) {
+		return -1;
+	}
 
-   return program;
+	/* use program object */
+	glUseProgram(program);
+
+	return program;
 }
