@@ -4,7 +4,7 @@ layout(location = 1) in vec3 aCol;
 out vec3 fcolor;
 void main() {
 	gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);
-	gl_PointSize = 5.0f;
+	gl_PointSize = 10.0f;
 	fcolor = aCol;
 
 }

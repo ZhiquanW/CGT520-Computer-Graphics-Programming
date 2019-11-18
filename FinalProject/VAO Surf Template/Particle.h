@@ -117,7 +117,6 @@ public:
         Particle::surface_tension_acceleration = surface_tension_acceleration;
     }
 
-
 };
 
 

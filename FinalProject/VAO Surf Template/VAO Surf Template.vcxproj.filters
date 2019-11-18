@@ -15,7 +15,6 @@
       <Filter>imgui</Filter>
     </ClCompile>
     <ClCompile Include="VAO Surf.cpp" />
-    <ClCompile Include="Surf.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="InitShader.h" />
@@ -40,13 +39,19 @@
     <ClInclude Include="include\imgui\stb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="Surf.h" />
+    <ClInclude Include="VAO Surf.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="triangle_vs.glsl">
       <Filter>shaders</Filter>
     </None>
     <None Include="triangle_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="particle_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="particle_fs.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>

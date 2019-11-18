@@ -87,7 +87,6 @@
     <ClCompile Include="include\imgui\imgui_draw.cpp" />
     <ClCompile Include="include\imgui\imgui_impl_glut.cpp" />
     <ClCompile Include="InitShader.cpp" />
-    <ClCompile Include="Surf.cpp" />
     <ClCompile Include="VAO Surf.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -99,9 +98,11 @@
     <ClInclude Include="include\imgui\stb_textedit.h" />
     <ClInclude Include="include\imgui\stb_truetype.h" />
     <ClInclude Include="InitShader.h" />
-    <ClInclude Include="Surf.h" />
+    <ClInclude Include="VAO Surf.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="particle_fs.glsl" />
+    <None Include="particle_vs.glsl" />
     <None Include="triangle_fs.glsl" />
     <None Include="triangle_vs.glsl" />
   </ItemGroup>
