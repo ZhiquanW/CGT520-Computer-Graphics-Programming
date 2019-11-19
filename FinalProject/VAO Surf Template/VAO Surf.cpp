@@ -14,11 +14,13 @@
 #include "imgui_impl_glut.h"
 #include "VAO Surf.h"
 #include "Vector3.h"
+
+#include "FluidParameter.h"
 #define vec Vector3
 
 //fluid solver parameters
-vec left_bottom_front = vec();
-vec right_top_back = vec(300, 400, 300);
+glm::vec3 left_bottom_front;
+glm::vec3 right_top_back(300, 400, -300);
 int particle_num = 2000;
 float rest_density = -1000;
 float gas_constant = 2000;
@@ -45,7 +47,7 @@ static const std::string particle_fs("particle_fs.glsl");
 GLuint particle_shader_program = -1;
 GLuint particle_vbo = -1;
 GLuint particle_vao = -1;
-
+const FluidParameter tmp_paras(particle_num, mass, kernel_radius, rest_density, viscosity, gas_constant, 1000,gravity);
 void draw_gui();
 GLuint create_particle_vbo();
 GLuint create_particle_vao();
@@ -125,8 +127,21 @@ void draw_gui() {
 	ImGui::SliderFloat3("Cam Pos", &campos[0], -20.0f, +20.0f);
 	ImGui::SliderFloat("Cam Angle", &camangle, -180.0f, +180.0f);
 	ImGui::End();
+	ImGui::Begin("Restriction Box", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
+	ImGui::SliderFloat3("left_bottom_front",&left_bottom_front[0],0,500);
+	ImGui::SliderFloat3("right_top_back", &right_top_back[0], 0, 500);
+
+	ImGui::End();
 	ImGui::Begin("Fluid Solver Params", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	ImGui::SliderInt("particle_num", &particle_num, 0, 10000);
+	ImGui::SliderFloat("Rest Density", &rest_density, -2000, 2000);
+	ImGui::SliderFloat("Gas Constant", &gas_constant,1000,3000);
+	ImGui::SliderFloat("Viscosity", &viscosity, 0, 500);
+	ImGui::SliderFloat("Kernal Radius", &kernel_radius,1,32);
+	ImGui::SliderFloat("Mass", &mass, 0,100);
+	ImGui::SliderFloat("Bound Damping", &bound_damping, 0, 1);
+	ImGui::SliderFloat("Gravity", &gravity, 100000, 130000);
+	ImGui::SliderFloat("Time Interval", &time_interval, 0, 0.01);
 	ImGui::End();
 	ImGui::Render();
 	first_frame = false;

@@ -8,6 +8,7 @@
 #include <cmath>
 #include "Vector3.h"
 #include "Particle.h"
+#include <GL/glew.h>
 
 #define vec3 Vector3
 
@@ -68,6 +69,52 @@ public:
         in_particle.set_velocity(new_vel);
         in_particle.set_position(tmp_pos);
     }
+
+	GLuint create_vbo() {
+		float pos[] = {
+			left_right_detection[0],bottom_top_detection[0],front_back_detection[0],
+			left_right_detection[0],bottom_top_detection[0],front_back_detection[1],
+			left_right_detection[0],bottom_top_detection[1],front_back_detection[0],
+			left_right_detection[0],bottom_top_detection[1],front_back_detection[1],
+			left_right_detection[1],bottom_top_detection[0],front_back_detection[0],
+			left_right_detection[1],bottom_top_detection[0],front_back_detection[1],
+			left_right_detection[1],bottom_top_detection[1],front_back_detection[0],
+			left_right_detection[1],bottom_top_detection[1],front_back_detection[1]
+		};
+		GLuint vbo = -1;
+		glGenBuffers(1, &vbo);
+		glBindBuffer(GL_ARRAY_BUFFER, vbo);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(pos), pos, GL_STATIC_DRAW);
+		return vbo;
+	}
+
+	GLuint create_ebo() {
+		float index[] = {
+			0,1,2,// left 0
+			1,2,3,// left 1
+			0,1,4,// bottom 0
+			1,4,5,// bottom 1
+			2,0,4,// front 0
+			2,4,6,// front 1
+			2,3,6,// top 0
+			3,6,7,// top 1
+			4,5,6,// right 0
+			5,6,7,// right 1
+			1,3,5,// back 0
+			3,6,7 // back 1
+		};
+		GLuint ebo;
+		glGenBuffers(1, &ebo); 
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
+		return ebo;
+	}
+
+	GLuint create_vao() {
+		GLuint vao = -1;
+		glGenVertexArrays(1, &vao);
+		glBindVertexArray(vao);
+	}
 };
 
 

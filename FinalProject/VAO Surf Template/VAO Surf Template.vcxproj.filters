@@ -40,6 +40,12 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="VAO Surf.h" />
+    <ClInclude Include="FluidDatabase.h" />
+    <ClInclude Include="FluidParameter.h" />
+    <ClInclude Include="FluidSolver.h" />
+    <ClInclude Include="Particle.h" />
+    <ClInclude Include="Vector3.h" />
+    <ClInclude Include="RestrictionBox.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="triangle_vs.glsl">

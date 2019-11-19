@@ -90,6 +90,9 @@
     <ClCompile Include="VAO Surf.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FluidDatabase.h" />
+    <ClInclude Include="FluidParameter.h" />
+    <ClInclude Include="FluidSolver.h" />
     <ClInclude Include="include\imgui\imconfig.h" />
     <ClInclude Include="include\imgui\imgui.h" />
     <ClInclude Include="include\imgui\imgui_impl_glut.h" />
@@ -98,7 +101,10 @@
     <ClInclude Include="include\imgui\stb_textedit.h" />
     <ClInclude Include="include\imgui\stb_truetype.h" />
     <ClInclude Include="InitShader.h" />
+    <ClInclude Include="Particle.h" />
+    <ClInclude Include="RestrictionBox.h" />
     <ClInclude Include="VAO Surf.h" />
+    <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="particle_fs.glsl" />
