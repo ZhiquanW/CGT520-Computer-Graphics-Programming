@@ -109,6 +109,8 @@
   <ItemGroup>
     <None Include="particle_fs.glsl" />
     <None Include="particle_vs.glsl" />
+    <None Include="restrictionbox_fs.glsl" />
+    <None Include="restrictionbox_vs.glsl" />
     <None Include="triangle_fs.glsl" />
     <None Include="triangle_vs.glsl" />
   </ItemGroup>

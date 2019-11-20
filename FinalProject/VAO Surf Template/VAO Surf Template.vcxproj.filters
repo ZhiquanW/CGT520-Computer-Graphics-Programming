@@ -44,8 +44,8 @@
     <ClInclude Include="FluidParameter.h" />
     <ClInclude Include="FluidSolver.h" />
     <ClInclude Include="Particle.h" />
-    <ClInclude Include="Vector3.h" />
     <ClInclude Include="RestrictionBox.h" />
+    <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="triangle_vs.glsl">
@@ -58,6 +58,12 @@
       <Filter>shaders</Filter>
     </None>
     <None Include="particle_fs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="restrictionbox_vs.glsl">
+      <Filter>shaders</Filter>
+    </None>
+    <None Include="restrictionbox_fs.glsl">
       <Filter>shaders</Filter>
     </None>
   </ItemGroup>
