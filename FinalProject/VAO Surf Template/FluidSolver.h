@@ -48,7 +48,7 @@ public:
 					float x_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 					float z_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 					Particle tmp_particle(cur_num);
-					tmp_particle.set_position(Vector3(x + x_offset, y, z+z_offset));
+					tmp_particle.set_position(Vector3(x, y, z));
 					realtime_particle_list.emplace_back(tmp_particle);
 				}
 			}

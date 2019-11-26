@@ -30,6 +30,15 @@ public:
         front_back_detection[1] = vertex1.z();
     }
 
+	void set_size(glm::vec3 lbf, glm::vec3 rtb) {
+		this->left_right_detection[0] = lbf.x;
+		this->left_right_detection[1] = rtb.x;
+		this->bottom_top_detection[0] = lbf.y;
+		this->bottom_top_detection[1] = rtb.y;
+		this->front_back_detection[0] = lbf.z;
+		this->front_back_detection[1] = rtb.z;
+	}
+
     void restrict_particle(Particle &in_particle) {
         Vector3 tmp_pos = in_particle.get_position();
         const Vector3 &tmp_vel = in_particle.get_velocity();

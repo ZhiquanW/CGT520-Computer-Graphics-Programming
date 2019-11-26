@@ -18,9 +18,9 @@
 #include "Vector3.h"
 //fluid solver parameters
 
-glm::vec3 left_bottom_front(0,0,0);
-glm::vec3 right_top_back(300,400,300);
-const int particle_num =1000;
+glm::vec3 left_bottom_front(-200,-200,-200);
+glm::vec3 right_top_back(200,200,200);
+const int particle_num =1;
 float rest_density = -1000;
 float gas_constant = 2000;
 float viscosity = 250;
@@ -28,16 +28,15 @@ float kernel_radius = 16;
 float mass = 65;
 float bound_damping = 0.5f;
 float gravity =  120000;
-int frame_num = 400;
 float time_interval = 0.001;
 //camera and viewport
-float camangle = 100.0f;
-glm::vec3 campos(150.0f, 200.0f, -600.0f);
-glm::vec3 camtar(150.0f, 200.0f, 0.0f);
+float camangle = 0.0f;
+glm::vec3 campos(0.0f, 0.0f, -600.0f);
+glm::vec3 camtar(0.0f, 0.0f, 0.0f);
 float aspect = 1.0f;
 
 // particles 2d
-float particle_pos[particle_num * 3] = {0};
+float particle_pos[particle_num * 3] = {100,10,100};
 // particles
 static const std::string particle_vs("particle_vs.glsl");
 static const std::string particle_fs("particle_fs.glsl");
@@ -83,7 +82,6 @@ int main(int argc, char** argv) {
 	int win = glutCreateWindow("Zhiquan Wang");
 
 	printGlInfo();
-
 	//Register callback functions with glut. 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
@@ -122,7 +120,7 @@ void initOpenGl() {
 	glEnable(GL_POINT_SPRITE);       // allows textured points
 	glEnable(GL_PROGRAM_POINT_SIZE); //allows us to set point size in vertex shader
 	glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(200, 200,200), 16);
+	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(100, 100,100), 16);
 	// init elementes in the scene
 	particle_shader_program = InitShader(particle_vs.c_str(), particle_fs.c_str());
 	particle_vao = create_particle_vao();
@@ -140,8 +138,8 @@ void draw_gui() {
 	ImGui::SliderFloat("Cam Angle", &camangle, -180.0f, +180.0f);
 	ImGui::End();
 	ImGui::Begin("Restriction Box", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SliderFloat3("left_bottom_front",&left_bottom_front[0],0,500);
-	ImGui::SliderFloat3("right_top_back", &right_top_back[0], 0, 500);
+	ImGui::SliderFloat3("left_bottom_front",&left_bottom_front[0],-500,500);
+	ImGui::SliderFloat3("right_top_back", &right_top_back[0], -500, 500);
 
 	ImGui::End();
 	//ImGui::Begin("Fluid Solver Params", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
@@ -176,6 +174,7 @@ void draw_particle(glm::mat4 m) {
 	tmp_solver.simulate_particles();		
 	float* ptr = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	vector<float> tmp_pos = tmp_solver.get_pos();
+
 	if (ptr) {
 		std::copy(tmp_pos.begin(), tmp_pos.end(), ptr);
 		glUnmapBufferARB(GL_ARRAY_BUFFER);
@@ -185,7 +184,7 @@ void draw_particle(glm::mat4 m) {
 		glUniformMatrix4fv(PVM_loc, 1, false, glm::value_ptr(m));
 	}
 	glBindVertexArray(particle_vao);
-	glDrawArrays(GL_POINTS, 0, particle_num*3);
+	glDrawArrays(GL_POINTS, 0, particle_num);
 }
 GLuint create_particle_vbo() {
 	GLuint vbo = -1;
@@ -194,7 +193,12 @@ GLuint create_particle_vbo() {
 	// bind buffer to a specific type
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 	// copy data into buffer's memory
+	//for (int i = 0; i < particle_num * 3; ++i) {
+	//	particle_pos[i] += 100;
+	//	std::cout << particle_pos[i] << std::endl;
+	//}
 	glBufferData(GL_ARRAY_BUFFER, sizeof(particle_pos), particle_pos, GL_DYNAMIC_DRAW);
+	
 	return vbo;
 }
 GLuint create_particle_vao() {

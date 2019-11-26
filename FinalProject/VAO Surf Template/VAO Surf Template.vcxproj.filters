@@ -48,12 +48,6 @@
     <ClInclude Include="Vector3.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="triangle_vs.glsl">
-      <Filter>shaders</Filter>
-    </None>
-    <None Include="triangle_fs.glsl">
-      <Filter>shaders</Filter>
-    </None>
     <None Include="particle_vs.glsl">
       <Filter>shaders</Filter>
     </None>
