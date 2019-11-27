@@ -7,5 +7,10 @@ void main() {
 	if (r > 0.5f) {
 		discard;
 	}
-	gl_FragColor = vec4(30.0f / 256.0f, 16.0f / 256.0f, opos.x / 200.0f, 1.0f);
+	if (0.46f<=r && r <= 0.5f) {
+		gl_FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+	} else {
+		gl_FragColor = vec4(30.0f / 256.0f, 161.0f / 256.0f, opos.x / 200.0f, 1.0f);
+
+	}
 }

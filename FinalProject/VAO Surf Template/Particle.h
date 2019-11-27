@@ -20,6 +20,8 @@ private:
     Vector3 pressure_acceleration;
     Vector3 viscosity_acceleration;
     Vector3 surface_tension_acceleration;
+	Vector3 external_acceleration;
+	
 public:
     Particle() = default;
 
@@ -66,7 +68,19 @@ public:
     void set_acceleration(const Vector3 &acceleration) {
         Particle::acceleration = acceleration;
     }
+	void add_acceleration(const Vector3& acceleration) {
+		Particle::external_acceleration = acceleration*1000;
 
+	}
+
+	const Vector3& get_external_acceleration() const {
+		//if (external_acceleration.x() != 0) {
+		//	std::cout << external_acceleration.x() << " " << external_acceleration.y() << std::endl;
+
+		//}
+
+		return external_acceleration;
+	}
     float get_density() const {
         return density;
     }

@@ -17,26 +17,33 @@
 #include "FluidSolver.h"
 #include "Vector3.h"
 //fluid solver parameters
+//mouse interaction
+bool isMouseHold = false;
+glm::mat4 M;
+glm::vec3 left_bottom_front(-200,-200,0);
+glm::vec3 right_top_back(200,200,0);
+const int max_particle_num =1000;
 
-glm::vec3 left_bottom_front(-200,-200,-200);
-glm::vec3 right_top_back(200,200,200);
-const int particle_num =1;
 float rest_density = -1000;
 float gas_constant = 2000;
 float viscosity = 250;
 float kernel_radius = 16;
 float mass = 65;
 float bound_damping = 0.5f;
-float gravity =  120000;
+float gravity =  9000;
 float time_interval = 0.001;
 //camera and viewport
 float camangle = 0.0f;
-glm::vec3 campos(0.0f, 0.0f, -600.0f);
+glm::vec3 campos(0.0f, 0.0f, 600.0f);
 glm::vec3 camtar(0.0f, 0.0f, 0.0f);
 float aspect = 1.0f;
 
 // particles 2d
-float particle_pos[particle_num * 3] = {100,10,100};
+float particle_pos[max_particle_num * 3] = {0};
+bool modeId = false;
+float radius = 100.0f;
+float force = 5000.0f;
+float shoot_acc = 20.0f;
 // particles
 static const std::string particle_vs("particle_vs.glsl");
 static const std::string particle_fs("particle_fs.glsl");
@@ -50,7 +57,7 @@ GLuint restrictionbox_shader_program = -1;
 GLuint restrictionbox_vao = -1;
 GLuint restrictionbox_ebo = -1;
 // fluid solver
-FluidParameter tmp_paras(particle_num, mass, kernel_radius, rest_density, viscosity, gas_constant, 0.01,gravity);
+FluidParameter tmp_paras(max_particle_num, mass, kernel_radius, rest_density, viscosity, gas_constant, 0.01,gravity);
 RestrictionBox tmp_box(Vector3(left_bottom_front), Vector3(right_top_back), bound_damping);
 FluidSolver tmp_solver(tmp_paras, tmp_box, time_interval);
 
@@ -107,6 +114,7 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); //Clear the back buffer
 	glm::mat4 V = glm::lookAt(campos, camtar, glm::vec3(0.0f, 1.0f, 0.0f)) * glm::rotate(camangle, glm::vec3(0.0f, 1.0f, 0.0f));
 	glm::mat4 P = glm::perspective(80.0f, aspect, 0.1f, 10000.0f); //not affine
+	M = P * V;
 	update_params();
 	draw_particle(P*V);
 	draw_gui();
@@ -120,7 +128,7 @@ void initOpenGl() {
 	glEnable(GL_POINT_SPRITE);       // allows textured points
 	glEnable(GL_PROGRAM_POINT_SIZE); //allows us to set point size in vertex shader
 	glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(100, 100,100), 16);
+	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(100, 100,0), 16);
 	// init elementes in the scene
 	particle_shader_program = InitShader(particle_vs.c_str(), particle_fs.c_str());
 	particle_vao = create_particle_vao();
@@ -138,9 +146,13 @@ void draw_gui() {
 	ImGui::SliderFloat("Cam Angle", &camangle, -180.0f, +180.0f);
 	ImGui::End();
 	ImGui::Begin("Restriction Box", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SliderFloat3("left_bottom_front",&left_bottom_front[0],-500,500);
-	ImGui::SliderFloat3("right_top_back", &right_top_back[0], -500, 500);
-
+	ImGui::SliderFloat2("left_bottom_front",&left_bottom_front[0],-200,400);
+	ImGui::SliderFloat2("right_top_back", &right_top_back[0], -200, 200);
+	ImGui::Begin("Control Particles");
+	ImGui::SliderFloat("Radius", &radius,0,200);
+	ImGui::SliderFloat("Force", &force, -10000, 10000);
+	ImGui::SliderFloat("Shooting Speed", &shoot_acc, 0, 100);
+	ImGui::Checkbox("Mode Switch", &modeId);
 	ImGui::End();
 	//ImGui::Begin("Fluid Solver Params", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
 	////ImGui::SliderInt("particle_num", &particle_num, 0, 10000);
@@ -165,6 +177,7 @@ void update_params() {
 	tmp_paras.set_gas_constant(gas_constant);
 	tmp_paras.set_viscosity_coefficient(viscosity);
 	tmp_box.set_bound_damping_coefficient(bound_damping);
+	tmp_box.set_size(left_bottom_front, right_top_back);
 	tmp_solver.set_params(tmp_paras);
 	tmp_solver.set_restriction_box(tmp_box);
 }
@@ -184,7 +197,7 @@ void draw_particle(glm::mat4 m) {
 		glUniformMatrix4fv(PVM_loc, 1, false, glm::value_ptr(m));
 	}
 	glBindVertexArray(particle_vao);
-	glDrawArrays(GL_POINTS, 0, particle_num);
+	glDrawArrays(GL_POINTS, 0,tmp_solver.particle_num());
 }
 GLuint create_particle_vbo() {
 	GLuint vbo = -1;
@@ -192,11 +205,7 @@ GLuint create_particle_vbo() {
 	glGenBuffers(1, &vbo);
 	// bind buffer to a specific type
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	// copy data into buffer's memory
-	//for (int i = 0; i < particle_num * 3; ++i) {
-	//	particle_pos[i] += 100;
-	//	std::cout << particle_pos[i] << std::endl;
-	//}
+
 	glBufferData(GL_ARRAY_BUFFER, sizeof(particle_pos), particle_pos, GL_DYNAMIC_DRAW);
 	
 	return vbo;
@@ -247,10 +256,19 @@ void special(int key, int x, int y) {
 }
 void motion(int x, int y) {
 	ImGui_ImplGlut_MouseMotionCallback(x, y);
+
 }
 
 void mouse(int button, int state, int x, int y) {
 	ImGui_ImplGlut_MouseButtonCallback(button, state);
+	glm::vec4 tmp_p((x - 640.0f / 2) / 320.0f * M[3][3], -(y - 640.0f / 2) / 320.0f * M[3][3], 0.0f, 0.0f);
+	tmp_p = glm::inverse(M) * tmp_p;
+	if (modeId) {
+		tmp_solver.add_new_particle(glm::vec2(tmp_p.x * shoot_acc, tmp_p.y * shoot_acc));
+	} else {
+		tmp_solver.add_force(glm::vec2(tmp_p.x, tmp_p.y), radius, force);
+	}
+
 }
 
 void reshape(int w, int h) {

@@ -48,7 +48,7 @@ public:
 					float x_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 					float z_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 					Particle tmp_particle(cur_num);
-					tmp_particle.set_position(Vector3(x, y, z));
+					tmp_particle.set_position(Vector3(x+x_offset, y, z));
 					realtime_particle_list.emplace_back(tmp_particle);
 				}
 			}
@@ -73,6 +73,9 @@ public:
 		return pos;
 	}
 
+	int particle_num() {
+		return this->realtime_particle_list.size();
+	}
 	void set_time_interval(float i) {
 		this->interval = i;
 	}
@@ -82,6 +85,24 @@ public:
 
 	void set_restriction_box(RestrictionBox rb) {
 		this->restriction_box = rb;
+	}
+
+	void add_force(glm::vec2 center, float radius,float f) {
+		for (auto& p : realtime_particle_list) {
+			glm::vec2 p_pos(p.get_position().x(), p.get_position().y());
+			float tmp_dis = glm::distance(center, p_pos);
+			if (tmp_dis < radius) {
+				glm::vec2 dir = glm::normalize((p_pos - center));
+				p.add_acceleration(Vector3(dir.x * f, dir.y * f, 0));
+			}
+		}
+
+	}
+	void add_new_particle(glm::vec2 a) {
+		Particle tmp_particle(realtime_particle_list.size());
+		tmp_particle.add_acceleration(Vector3(a.x,a.y, 0));
+		tmp_particle.set_position(Vector3(0,0,0));
+		realtime_particle_list.emplace_back(tmp_particle);
 	}
 private:
 	void compute_particle_acceleration() {
@@ -94,7 +115,9 @@ private:
 			p.set_acceleration(p.get_pressure_acceleration() +
 				p.get_viscosity_acceleration() +
 				p.get_surface_tension_acceleration() +
-				fluid_parameter.get_gravity_acceleration_coefficient() * Vector3(0, -1, 0));
+				fluid_parameter.get_gravity_acceleration_coefficient() * Vector3(0, -1, 0) +
+				p.get_external_acceleration());
+			p.add_acceleration(Vector3(0, 0, 0));
 		}
 	}
 

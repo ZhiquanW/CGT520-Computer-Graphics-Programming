@@ -9,7 +9,7 @@
 #include "Particle.h"
 #include <GL/glew.h>
 #include "Vector3.h"
-
+#include <vector>
 class RestrictionBox {
 private:
     float left_right_detection[2]{};
@@ -43,24 +43,26 @@ public:
         Vector3 tmp_pos = in_particle.get_position();
         const Vector3 &tmp_vel = in_particle.get_velocity();
         Vector3 new_vel = tmp_vel;
+		float x_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float y_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
         if (tmp_pos.x() < left_right_detection[0]) {
             new_vel.set_x(-bound_damping_coefficient * tmp_vel.x());
-            tmp_pos.set_x(left_right_detection[0]+0.01f);
+            tmp_pos.set_x(left_right_detection[0]+ x_offset);
             //-= 2 * dot(normal_arr[0], tmp_vel) * normal_arr[0];
         }
         if (tmp_pos.x() > left_right_detection[1]) {
             new_vel.set_x(-bound_damping_coefficient * tmp_vel.x());
-            tmp_pos.set_x(left_right_detection[1]-0.01f);
+            tmp_pos.set_x(left_right_detection[1]- x_offset);
             // new_vel -= 2 * dot(normal_arr[1], tmp_vel) * normal_arr[1];
         }
         if (tmp_pos.y() < bottom_top_detection[0]) {
             new_vel.set_y(-bound_damping_coefficient * tmp_vel.y());
-            tmp_pos.set_y(bottom_top_detection[0]+0.01f);
+            tmp_pos.set_y(bottom_top_detection[0]+ y_offset);
             //new_vel -= 2 * dot(normal_arr[2], tmp_vel) * normal_arr[2];
         }
         if (tmp_pos.y() > bottom_top_detection[1]) {
             new_vel.set_y(-bound_damping_coefficient * tmp_vel.y());
-            tmp_pos.set_y(bottom_top_detection[1]-0.01f);
+            tmp_pos.set_y(bottom_top_detection[1]- y_offset);
             //new_vel -= 2 * dot(normal_arr[3], tmp_vel) * normal_arr[3];
         }
         if (tmp_pos.z() < front_back_detection[0]) {
@@ -135,6 +137,26 @@ public:
 
 	void draw(GLuint vao,glm::mat4 m,GLuint shader_program) {
 		glUseProgram(shader_program);
+		glBindBuffer(GL_ARRAY_BUFFER, vao);
+		float* ptr = (float*)glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+		float pos[] = {
+			left_right_detection[0],bottom_top_detection[0],front_back_detection[0],
+			left_right_detection[0],bottom_top_detection[0],front_back_detection[1],
+			left_right_detection[0],bottom_top_detection[1],front_back_detection[0],
+			left_right_detection[0],bottom_top_detection[1],front_back_detection[1],
+			left_right_detection[1],bottom_top_detection[0],front_back_detection[0],
+			left_right_detection[1],bottom_top_detection[0],front_back_detection[1],
+			left_right_detection[1],bottom_top_detection[1],front_back_detection[0],
+			left_right_detection[1],bottom_top_detection[1],front_back_detection[1]
+		};
+		std::vector<float> tmp_pos;
+		for (int i = 0; i < 24; ++i) {
+			tmp_pos.push_back(pos[i]);
+		}
+		if (ptr) {
+			std::copy(tmp_pos.begin(), tmp_pos.end(), ptr);
+			glUnmapBufferARB(GL_ARRAY_BUFFER);
+		}
 		int PVM_loc = glGetUniformLocation(shader_program, "PVM");
 		if (PVM_loc != -1) {
 			glUniformMatrix4fv(PVM_loc, 1, false, glm::value_ptr(m));
