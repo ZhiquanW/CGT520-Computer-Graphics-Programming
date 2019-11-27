@@ -35,7 +35,7 @@ public:
 		interval(i){
 
 	}
-	void initialize_particles(const Vector3 & _vertex0, const Vector3 & _vertex1, const double_t & _interval) {
+	void initialize_particles(const Vector3 & _vertex0, const Vector3 & _vertex1, const double_t & _interval,glm::vec3 c0,glm::vec3 c1) {
 		size_t cur_num = 0;
 		for (double_t x = _vertex0[0]; x <= _vertex1[0]; x += _interval) {
 			for (double_t z = _vertex0[2]; z <= _vertex1[2]; z += _interval) {
@@ -47,7 +47,9 @@ public:
 					}
 					float x_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
 					float z_offset = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+					glm::vec3 col = float(realtime_particle_list.size() % 300) / 300.0f  * (c1 - c0) + c0;
 					Particle tmp_particle(cur_num);
+					tmp_particle.set_color(col);
 					tmp_particle.set_position(Vector3(x+x_offset, y, z));
 					realtime_particle_list.emplace_back(tmp_particle);
 				}
@@ -69,6 +71,9 @@ public:
 			pos.push_back(realtime_particle_list[i].get_position().x());
 			pos.push_back(realtime_particle_list[i].get_position().y());
 			pos.push_back(realtime_particle_list[i].get_position().z());
+			pos.push_back(realtime_particle_list[i].get_color().x);
+			pos.push_back(realtime_particle_list[i].get_color().y);
+			pos.push_back(realtime_particle_list[i].get_color().z);
 		}
 		return pos;
 	}
@@ -98,10 +103,12 @@ public:
 		}
 
 	}
-	void add_new_particle(glm::vec2 a) {
+	void add_new_particle(glm::vec2 a,glm::vec3 c0,glm::vec3 c1) {
 		Particle tmp_particle(realtime_particle_list.size());
 		tmp_particle.add_acceleration(Vector3(a.x,a.y, 0));
 		tmp_particle.set_position(Vector3(0,0,0));
+		tmp_particle.set_color(float(realtime_particle_list.size()%300)/300.0f * (c1 - c0)+c0);
+		//std::cout << float(std::cos(double(realtime_particle_list.size() / 50.0f))) << std::endl;
 		realtime_particle_list.emplace_back(tmp_particle);
 	}
 private:

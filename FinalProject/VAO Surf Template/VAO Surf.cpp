@@ -23,6 +23,8 @@ glm::mat4 M;
 glm::vec3 left_bottom_front(-200,-200,0);
 glm::vec3 right_top_back(200,200,0);
 const int max_particle_num =1000;
+glm::vec3 color0(63.0f/255.0f, 94.0f/255.0f, 251.0f/255.0f);
+glm::vec3 color1(252.0f / 255.0f, 70.0f / 255.0f, 107.0f / 255.0f);
 
 float rest_density = -1000;
 float gas_constant = 2000;
@@ -30,7 +32,7 @@ float viscosity = 250;
 float kernel_radius = 16;
 float mass = 65;
 float bound_damping = 0.5f;
-float gravity =  9000;
+float gravity =  6000;
 float time_interval = 0.001;
 //camera and viewport
 float camangle = 0.0f;
@@ -39,7 +41,7 @@ glm::vec3 camtar(0.0f, 0.0f, 0.0f);
 float aspect = 1.0f;
 
 // particles 2d
-float particle_pos[max_particle_num * 3] = {0};
+float particle_pos[max_particle_num * 6] = {0};
 bool modeId = false;
 float radius = 100.0f;
 float force = 5000.0f;
@@ -128,7 +130,7 @@ void initOpenGl() {
 	glEnable(GL_POINT_SPRITE);       // allows textured points
 	glEnable(GL_PROGRAM_POINT_SIZE); //allows us to set point size in vertex shader
 	glClearColor(0.65f, 0.65f, 0.65f, 1.0f);
-	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(100, 100,0), 16);
+	tmp_solver.initialize_particles(Vector3(0, 0, 0), Vector3(100, 100,0), 16,color0,color1);
 	// init elementes in the scene
 	particle_shader_program = InitShader(particle_vs.c_str(), particle_fs.c_str());
 	particle_vao = create_particle_vao();
@@ -146,8 +148,8 @@ void draw_gui() {
 	ImGui::SliderFloat("Cam Angle", &camangle, -180.0f, +180.0f);
 	ImGui::End();
 	ImGui::Begin("Restriction Box", nullptr, ImGuiWindowFlags_AlwaysAutoResize);
-	ImGui::SliderFloat2("left_bottom_front",&left_bottom_front[0],-200,400);
-	ImGui::SliderFloat2("right_top_back", &right_top_back[0], -200, 200);
+	ImGui::SliderFloat2("left_bottom_front",&left_bottom_front[0],-400,400);
+	ImGui::SliderFloat2("right_top_back", &right_top_back[0], -400, 400);
 	ImGui::Begin("Control Particles");
 	ImGui::SliderFloat("Radius", &radius,0,200);
 	ImGui::SliderFloat("Force", &force, -10000, 10000);
@@ -217,7 +219,10 @@ GLuint create_particle_vao() {
 	particle_vbo = create_particle_vbo();
 	const GLint pos_loc = 0;
 	glEnableVertexAttribArray(pos_loc);
-	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
+	glVertexAttribPointer(pos_loc, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	const GLint col_loc = 1;
+	glEnableVertexAttribArray(col_loc);
+	glVertexAttribPointer(col_loc, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3*sizeof(float)));
 	glBindVertexArray(0);
 	return vao;
 }
@@ -264,7 +269,7 @@ void mouse(int button, int state, int x, int y) {
 	glm::vec4 tmp_p((x - 640.0f / 2) / 320.0f * M[3][3], -(y - 640.0f / 2) / 320.0f * M[3][3], 0.0f, 0.0f);
 	tmp_p = glm::inverse(M) * tmp_p;
 	if (modeId) {
-		tmp_solver.add_new_particle(glm::vec2(tmp_p.x * shoot_acc, tmp_p.y * shoot_acc));
+		tmp_solver.add_new_particle(glm::vec2(tmp_p.x * shoot_acc, tmp_p.y * shoot_acc),color0,color1);
 	} else {
 		tmp_solver.add_force(glm::vec2(tmp_p.x, tmp_p.y), radius, force);
 	}

@@ -21,7 +21,7 @@ private:
     Vector3 viscosity_acceleration;
     Vector3 surface_tension_acceleration;
 	Vector3 external_acceleration;
-	
+	glm::vec3 color;
 public:
     Particle() = default;
 
@@ -36,6 +36,12 @@ public:
         Particle::index = index;
     }
 
+	void set_color(glm::vec3 c) {
+		Particle::color = c;
+	}
+	glm::vec3 get_color() {
+		return Particle::color;
+	}
     const Vector3 &get_position() const {
         return position;
     }
